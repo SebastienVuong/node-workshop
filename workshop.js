@@ -30,8 +30,12 @@ function getAddressPosition(address) {
         });
 }
 
+// HELLO NATHAN!
+// JUST CURIOUS WHETHER YOU LOOK AT OUR CODES LOL
+// CHEERS!
+
 function getCurrentTemperatureAtPosition(position) {
-    return request("https://api.darksky.net/forecast/6f79e5f22ba33f3f5c674b0b9f80fdc4/" + position)
+    return request("https://api.darksky.net/forecast/6f79e5f22ba33f3f5c674b0b9f80fdc4/" + position.lat + ',' + position.lng)
         .then(function(response) {
             var data = JSON.parse(response);
             return data.currently.temperature;
