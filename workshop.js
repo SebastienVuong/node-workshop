@@ -13,27 +13,40 @@ function getIssPosition() {
                 var data = JSON.parse(response);
                 // Return object with lat and lng
                 var outputObject= {};
-                outputObject.lat = data.latitude;
-                outputObject.lng = data.longitude;
+                outputObject.lat = data.iss_position.latitude;
+                outputObject.lng = data.iss_position.longitude;
                 return outputObject;
             }
         )
 }
 
 function getAddressPosition(address) {
-
+    return request("https://maps.googleapis.com/maps/api/geocode/json?address=" + address)
+        .then(function(response) {
+            var data = JSON.parse(response);
+            var outputObject = {};
+            outputObject = data.results[0].geometry.location;
+            return outputObject;
+        });
 }
 
 function getCurrentTemperatureAtPosition(position) {
-
+    return request("https://api.darksky.net/forecast/6f79e5f22ba33f3f5c674b0b9f80fdc4/" + position)
+        .then(function(response) {
+            var data = JSON.parse(response);
+            return data.currently.temperature;
+        })
 }
 
 function getCurrentTemperature(address) {
-
+    return getCurrentTemperatureAtPosition(getAddressPosition((address)));
 }
 
 function getDistanceFromIss(address) {
-
+    return Promise.all([getIssPosition(),getAddressPosition(address)])
+        .then(function(positions) {
+            return getDistance(positions[0],positions[1]);
+            });
 }
 
 exports.getIssPosition = getIssPosition;
