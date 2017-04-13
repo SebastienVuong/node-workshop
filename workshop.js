@@ -1,4 +1,4 @@
-var request = require('request-promise');
+var request = require('request-promise'); // Imports request-promise module and allows us to use it
 
 // Euclidian distance between two points
 function getDistance(pos1, pos2) {
@@ -16,19 +16,22 @@ function getIssPosition() {
                 outputObject.lat = data.iss_position.latitude;
                 outputObject.lng = data.iss_position.longitude;
                 return outputObject;
-            }
-        )
+            })
+                .catch(function(error){
+                    console.log("Nuhhhh~", error);
+                });
 }
 
 function getAddressPosition(address) {
     return request("https://maps.googleapis.com/maps/api/geocode/json?address=" + address)
         .then(function(response) {
             var data = JSON.parse(response);
-            var outputObject = {};
-            outputObject = data.results[0].geometry.location;
-            return outputObject;
-        });
-}
+            return data.results[0].geometry.location;
+        })
+            .catch(function(error){
+                console.log("Nuhhhh~", error);
+            });
+    }
 
 // HELLO NATHAN!
 // JUST CURIOUS WHETHER YOU LOOK AT OUR CODES LOL
@@ -40,21 +43,44 @@ function getCurrentTemperatureAtPosition(position) {
             var data = JSON.parse(response);
             return data.currently.temperature;
         })
+            .catch(function(error){
+                console.log("Nuhhhh~", error);
+            });
 }
 
 function getCurrentTemperature(address) {
-    return getCurrentTemperatureAtPosition(getAddressPosition((address)));
-}
+    return getAddressPosition(address)
+        .then(function(response) {
+            return getCurrentTemperatureAtPosition(response)
+        })
+        /* OR .then(getCurrentTemperatureAtPosition);*/
+            .catch(function(error){
+                console.log("Nuhhhh~", error);
+            });
+} 
 
 function getDistanceFromIss(address) {
     return Promise.all([getIssPosition(),getAddressPosition(address)])
         .then(function(positions) {
             return getDistance(positions[0],positions[1]);
+        })
+            .catch(function(error){
+                console.log("Nuhhhh~", error);
             });
 }
 
+// Section below exports the functions so the test files can import them
 exports.getIssPosition = getIssPosition;
 exports.getAddressPosition = getAddressPosition;
 exports.getCurrentTemperatureAtPosition = getCurrentTemperatureAtPosition;
 exports.getCurrentTemperature = getCurrentTemperature;
 exports.getDistanceFromIss = getDistanceFromIss;
+
+// IMPORTING :
+// var getIssPosition = require('./workshop.js')..getIssPosition; FOR FILES IN SAME FOLDER. 
+// "./" necessary to specify it's a path, but to the current folder.
+// ".getIssPosition" to call onto the function we want within the file because "require('./workshop.js)" returns an object with all the functions in it.
+// 'require' exexutes the file so we only have the functions in the file usually.
+
+// Usually, you'd import it this way : var functions = require('./workshop');
+// and then, call functions.getIssPosition()
